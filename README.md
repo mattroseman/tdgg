@@ -1,7 +1,9 @@
-# tsgg
-sgg chat in the terminal
+# tdgg
+Destiny.gg chat in the terminal
 
-![](.github/tsgg.png)
+Original code from: https://github.com/MemeLabs/tsgg
+
+![](.github/tdgg.png)
 
 `cp sample-config.toml config.toml`
 `go build`

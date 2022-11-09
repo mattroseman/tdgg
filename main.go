@@ -221,7 +221,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		req.Header.Set("User-Agent", "tsgg")
+		req.Header.Set("User-Agent", "tdgg")
 		res, err := historyClient.Do(req)
 		if err != nil {
 			log.Fatal(err)

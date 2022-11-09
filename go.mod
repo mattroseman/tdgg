@@ -1,4 +1,4 @@
-module github.com/MemeLabs/tsgg
+module github.com/cantclosevim/tdgg
 
 go 1.15
 
