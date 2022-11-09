@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const emoteEndpoint = "https://cdn.destiny.gg/2.43.4/emotes/emotes.json"
+const emoteEndpoint = "https://cdn.destiny.gg/emotes/emotes.json"
 
 type ImageData struct {
 	Height int32  `json:"height"`
