@@ -230,9 +230,17 @@ func (c *chat) renderMessage(m dggchat.Message) {
 	if c.username != "" && strings.Contains(strings.ToLower(m.Message), strings.ToLower(c.username)) || c.isHighlighted(m.Message) {
 		formattedData = fmt.Sprintf("%s%s%s%s", c.config.HighlightBg, c.config.HighlightFg, m.Message, reset) // change message color if the message contains a highlighed string
 	} else if strings.Contains(m.Message, "nsfl") {
-		formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, m.Message, reset) // nsfl post
+		if c.config.HideNSFL {
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, "<nsfl post hidden>", reset) // nsfl post
+		} else {
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, m.Message, reset) // nsfl post
+		}
 	} else if strings.Contains(m.Message, "nsfw") {
-		formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, m.Message, reset) // nsfw post
+		if c.config.HideNSFW {
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, "<nsfw post hidden>", reset)
+		} else {
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, m.Message, reset) // nsfw post
+		}
 	} else if strings.HasPrefix(m.Message, ">") {
 		formattedData = fmt.Sprintf("%s%s%s", fgGreen, m.Message, reset) // greentext
 	}

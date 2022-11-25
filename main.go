@@ -24,11 +24,13 @@ type config struct {
 	Timeformat      string            `toml:"timeformat"`
 	Maxlines        int               `toml:"maxlines"`
 	ScrollingSpeed  int               `toml:"scrolling_speed"`
-	PageUpDownSpeed int               `toml:"page_up_down_Speed"`
+	PageUpDownSpeed int               `toml:"page_up_down_speed"`
 	Highlighted     []string          `toml:"highlighted"`
 	Tags            map[string]string `toml:"tags"`
 	Ignores         []string          `toml:"ignores"`
 	Stalks          []string          `toml:"stalks"`
+	HideNSFW        bool              `toml:"hide_nsfw"`
+	HideNSFL        bool              `toml:"hide_nsfl"`
 	ShowJoinLeave   bool              `toml:"showjoinleave"`
 	HighlightColor  string            `toml:"highlight_color"`
 	TagColor        string            `toml:"tag_color"`
