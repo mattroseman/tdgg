@@ -9,6 +9,7 @@ import (
 
 	"github.com/MemeLabs/dggchat"
 	"github.com/awesome-gocui/gocui"
+	"github.com/gen2brain/beeep"
 )
 
 type color string
@@ -111,7 +112,7 @@ func layout(g *gocui.Gui) error {
 		if !gocui.IsUnknownView(err) {
 			return err
 		}
-		messages.Title = " messages: "
+		messages.Title = " messages "
 		messages.Autoscroll = true
 		messages.Wrap = true
 	}
@@ -120,7 +121,7 @@ func layout(g *gocui.Gui) error {
 		if !gocui.IsUnknownView(err) {
 			return err
 		}
-		input.Title = " send: "
+		input.Title = " send "
 		input.Autoscroll = false
 		input.Wrap = true
 		input.Editable = true
@@ -132,7 +133,7 @@ func layout(g *gocui.Gui) error {
 		if !gocui.IsUnknownView(err) {
 			return err
 		}
-		users.Title = " users: "
+		users.Title = " users "
 		users.Autoscroll = false
 		users.Wrap = false
 	}
@@ -229,20 +230,23 @@ func (c *chat) renderMessage(m dggchat.Message) {
 	formattedData := m.Message
 	if c.username != "" && strings.Contains(strings.ToLower(m.Message), strings.ToLower(c.username)) || c.isHighlighted(m.Message) {
 		formattedData = fmt.Sprintf("%s%s%s%s", c.config.HighlightBg, c.config.HighlightFg, m.Message, reset) // change message color if the message contains a highlighed string
+		if c.config.MsgNotify {
+			beeep.Notify(m.Sender.Nick, m.Message, "") // send notification
+		}
 	} else if strings.Contains(m.Message, "nsfl") {
 		if c.config.HideNSFL {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, "<nsfl post hidden>", reset) // nsfl post
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, "<nsfl post hidden>", reset) // hide nsfl post
 		} else {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, m.Message, reset) // nsfl post
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, m.Message, reset) // render nsfl post
 		}
 	} else if strings.Contains(m.Message, "nsfw") {
 		if c.config.HideNSFW {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, "<nsfw post hidden>", reset)
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, "<nsfw post hidden>", reset) // hide nsfw post
 		} else {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, m.Message, reset) // nsfw post
+			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, m.Message, reset) // render nsfw post
 		}
 	} else if strings.HasPrefix(m.Message, ">") {
-		formattedData = fmt.Sprintf("%s%s%s", fgGreen, m.Message, reset) // greentext
+		formattedData = fmt.Sprintf("%s%s%s", fgGreen, m.Message, reset) // render greentext
 	}
 
 	// currently not in use
@@ -346,7 +350,7 @@ func (c *chat) renderUsers(users []dggchat.User) {
 			return err
 		}
 
-		userView.Title = fmt.Sprintf("%d users:", len(users))
+		userView.Title = fmt.Sprintf(" %d users ", len(users))
 		c.sortUsers(users)
 
 		var usersList string

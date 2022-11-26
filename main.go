@@ -31,6 +31,7 @@ type config struct {
 	Stalks          []string          `toml:"stalks"`
 	HideNSFW        bool              `toml:"hide_nsfw"`
 	HideNSFL        bool              `toml:"hide_nsfl"`
+	MsgNotify       bool              `toml:"notifications"`
 	ShowJoinLeave   bool              `toml:"showjoinleave"`
 	HighlightColor  string            `toml:"highlight_color"`
 	TagColor        string            `toml:"tag_color"`
