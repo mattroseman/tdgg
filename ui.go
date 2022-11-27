@@ -220,7 +220,7 @@ func (c *chat) renderMessage(m dggchat.Message) {
 	var coloredNick string
 
 	if c.isTagged(m.Sender.Nick) {
-		coloredNick = fmt.Sprintf("%s%s %s", tagMap[c.config.Tags[strings.ToLower(m.Sender.Nick)]], taggedNick, reset) // change color of username if they are tagged
+		coloredNick = fmt.Sprintf("%s%s %s", tagMap[c.config.Tags[strings.ToLower(m.Sender.Nick)]], taggedNick, reset) // change color of username if the user is tagged
 	}
 
 	if coloredNick == "" {
@@ -233,20 +233,22 @@ func (c *chat) renderMessage(m dggchat.Message) {
 		if c.config.MsgNotify {
 			beeep.Notify(m.Sender.Nick, m.Message, "") // send notification
 		}
-	} else if strings.Contains(m.Message, "nsfl") {
+	} else if strings.Contains(strings.ToLower(m.Message), "nsfl") {
 		if c.config.HideNSFL {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, "<nsfl post hidden>", reset) // hide nsfl post
+			formattedData = fmt.Sprintf("%s%s%s", fgYellow, "<nsfl post hidden>", reset) // hide nsfl post
 		} else {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightYellow, m.Message, reset) // render nsfl post
+			formattedData = fmt.Sprintf("%s%s%s", fgYellow, m.Message, reset) // render nsfl post
 		}
-	} else if strings.Contains(m.Message, "nsfw") {
+	} else if strings.Contains(strings.ToLower(m.Message), "nsfw") {
 		if c.config.HideNSFW {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, "<nsfw post hidden>", reset) // hide nsfw post
+			formattedData = fmt.Sprintf("%s%s%s", fgRed, "<nsfw post hidden>", reset) // hide nsfw post
 		} else {
-			formattedData = fmt.Sprintf("%s%s%s", fgBrightRed, m.Message, reset) // render nsfw post
+			formattedData = fmt.Sprintf("%s%s%s", fgRed, m.Message, reset) // render nsfw post
 		}
 	} else if strings.HasPrefix(m.Message, ">") {
 		formattedData = fmt.Sprintf("%s%s%s", fgGreen, m.Message, reset) // render greentext
+	} else if strings.HasPrefix(m.Message, "ඞ") {
+		formattedData = fmt.Sprintf("%s%s%s", fgMagenta, m.Message, reset) // render suspost
 	}
 
 	// currently not in use
