@@ -229,28 +229,33 @@ func (c *chat) renderMessage(m dggchat.Message) {
 	}
 
 	formattedData := m.Message
+	var messageColor string
 	if c.username != "" && strings.Contains(strings.ToLower(m.Message), strings.ToLower(c.username)) || c.isHighlighted(m.Message) {
-		formattedData = fmt.Sprintf("%s%s%s%s", c.config.HighlightBg, c.config.HighlightFg, m.Message, reset) // change message color if the message contains a highlighed string
+		messageColor = c.config.HighlightBg
 		if c.config.MsgNotify {
-			beeep.Notify(m.Sender.Nick, m.Message, "") // send notification
+			beeep.Notify("tdgg - "+m.Sender.Nick, m.Message, "")
 		}
-	} else if strings.Contains(strings.ToLower(m.Message), "nsfl") {
-		if c.config.HideNSFL {
-			formattedData = fmt.Sprintf("%s%s%s", fgYellow, "<nsfl post hidden>", reset) // hide nsfl post
-		} else {
-			formattedData = fmt.Sprintf("%s%s%s", fgYellow, m.Message, reset) // render nsfl post
-		}
-	} else if strings.Contains(strings.ToLower(m.Message), "nsfw") {
-		if c.config.HideNSFW {
-			formattedData = fmt.Sprintf("%s%s%s", fgRed, "<nsfw post hidden>", reset) // hide nsfw post
-		} else {
-			formattedData = fmt.Sprintf("%s%s%s", fgRed, m.Message, reset) // render nsfw post
-		}
-	} else if strings.HasPrefix(m.Message, ">") {
-		formattedData = fmt.Sprintf("%s%s%s", fgGreen, m.Message, reset) // render greentext
-	} else if strings.HasPrefix(m.Message, "ඞ") {
-		formattedData = fmt.Sprintf("%s%s%s", fgMagenta, m.Message, reset) // render suspost
 	}
+	switch {
+	case strings.Contains(strings.ToLower(m.Message), "nsfl"):
+		messageColor += string(fgYellow)
+		if c.config.HideNSFL {
+			formattedData = "<nsfl post hidden>"
+		}
+	case strings.Contains(strings.ToLower(m.Message), "nsfw"):
+		messageColor += string(fgRed)
+		if c.config.HideNSFW {
+			formattedData = "<nsfw post hidden>"
+		}
+	case strings.HasPrefix(m.Message, ">"):
+		messageColor += string(fgGreen)
+	case strings.HasPrefix(m.Message, "ඞ"):
+		messageColor += string(fgMagenta)
+	}
+	if messageColor == c.config.HighlightBg {
+		messageColor += c.config.HighlightFg
+	}
+	formattedData = fmt.Sprintf("%s%s%s", messageColor, formattedData, reset)
 
 	// currently not in use
 	formattedTag := "   "
