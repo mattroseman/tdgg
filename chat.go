@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/MemeLabs/dggchat"
 	"github.com/awesome-gocui/gocui"
+	"github.com/mattroseman/dggchat"
 )
 
 const maxChatHistory = 10

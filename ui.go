@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MemeLabs/dggchat"
 	"github.com/awesome-gocui/gocui"
 	"github.com/gen2brain/beeep"
+	"github.com/mattroseman/dggchat"
 )
 
 type color string
@@ -274,6 +274,70 @@ func (c *chat) renderMessage(m dggchat.Message) {
 
 	msg := fmt.Sprintf("%s: %s", coloredNick, formattedData)
 	c.guiwrapper.addMessage(guimessage{m.Timestamp, formattedTag, msg, m.Sender.Nick})
+}
+
+func (c *chat) renderPin(p dggchat.Pin) {
+	// TODO edit this function to
+	// 1. skip filters that shouldn't be applied to pins
+	// 2. color the whole message something noticeable
+	// 3. have a full date + time for the message
+
+	taggedNick := p.Sender.Nick
+
+	// don't show ignored users
+	if contains(c.config.Ignores, strings.ToLower(taggedNick)) {
+		return
+	}
+
+	var coloredNick string
+
+	if c.isTagged(p.Sender.Nick) {
+		coloredNick = fmt.Sprintf("%s%s %s", tagMap[c.config.Tags[strings.ToLower(p.Sender.Nick)]], taggedNick, reset) // change color of username if the user is tagged
+	}
+
+	if coloredNick == "" {
+		coloredNick = fmt.Sprintf("%s%s%s", Bold, taggedNick, reset)
+	}
+
+	formattedData := p.Message
+	var messageColor string
+	if c.username != "" && strings.Contains(strings.ToLower(p.Message), strings.ToLower(c.username)) || c.isHighlighted(p.Message) {
+		messageColor = c.config.HighlightBg
+		if c.config.MsgNotify {
+			beeep.Notify("tdgg - "+p.Sender.Nick, p.Message, "")
+		}
+	}
+	switch {
+	case strings.Contains(strings.ToLower(p.Message), "nsfl"):
+		messageColor += string(fgYellow)
+		if c.config.HideNSFL {
+			formattedData = "<nsfl post hidden>"
+		}
+	case strings.Contains(strings.ToLower(p.Message), "nsfw"):
+		messageColor += string(fgRed)
+		if c.config.HideNSFW {
+			formattedData = "<nsfw post hidden>"
+		}
+	case strings.HasPrefix(p.Message, ">"):
+		messageColor += string(fgGreen)
+	case strings.HasPrefix(p.Message, "ඞ"):
+		messageColor += string(fgMagenta)
+	}
+	if messageColor == c.config.HighlightBg {
+		messageColor += c.config.HighlightFg
+	}
+	formattedData = fmt.Sprintf("%s%s%s", messageColor, formattedData, reset)
+
+	// currently not in use
+	formattedTag := "   "
+	c.config.RLock()
+	if color, ok := c.config.Tags[strings.ToLower(p.Sender.Nick)]; ok {
+		formattedTag = fmt.Sprintf("%s   %s", tagMap[color], reset)
+	}
+	c.config.RUnlock()
+
+	msg := fmt.Sprintf("%s: %s", coloredNick, formattedData)
+	c.guiwrapper.addMessage(guimessage{p.Timestamp, formattedTag, msg, p.Sender.Nick})
 }
 
 func (c *chat) renderPrivateMessage(pm dggchat.PrivateMessage) {
