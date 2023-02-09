@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/MemeLabs/dggchat"
 	"github.com/awesome-gocui/gocui"
+	"github.com/mattroseman/dggchat"
 )
 
 type config struct {
@@ -165,6 +165,9 @@ func main() {
 	})
 	chat.Session.AddMessageHandler(func(m dggchat.Message, s *dggchat.Session) {
 		chat.renderMessage(m)
+	})
+	chat.Session.AddPinHandler(func(p dggchat.Pin, s *dggchat.Session) {
+		chat.renderPin(p)
 	})
 	chat.Session.AddErrorHandler(func(e string, s *dggchat.Session) {
 		chat.renderError(e)
