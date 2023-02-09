@@ -276,17 +276,7 @@ func (c *chat) renderMessage(m dggchat.Message) {
 }
 
 func (c *chat) renderPin(p dggchat.Pin) {
-	// TODO edit this function to
-	// 1. skip filters that shouldn't be applied to pins
-	// 2. color the whole message something noticeable
-	// 3. have a full date + time for the message
-
 	taggedNick := p.Sender.Nick
-
-	// don't show ignored users
-	if contains(c.config.Ignores, strings.ToLower(taggedNick)) {
-		return
-	}
 
 	var coloredNick string
 
@@ -307,16 +297,6 @@ func (c *chat) renderPin(p dggchat.Pin) {
 		}
 	}
 	switch {
-	case strings.Contains(strings.ToLower(p.Message), "nsfl"):
-		messageColor += string(fgYellow)
-		if c.config.HideNSFL {
-			formattedData = "<nsfl post hidden>"
-		}
-	case strings.Contains(strings.ToLower(p.Message), "nsfw"):
-		messageColor += string(fgRed)
-		if c.config.HideNSFW {
-			formattedData = "<nsfw post hidden>"
-		}
 	case strings.HasPrefix(p.Message, ">"):
 		messageColor += string(fgGreen)
 	case strings.HasPrefix(p.Message, "ඞ"):
