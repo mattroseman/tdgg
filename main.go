@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/MemeLabs/dggchat"
 	"github.com/awesome-gocui/gocui"
-	"github.com/mattroseman/dggchat"
 )
 
 type config struct {
