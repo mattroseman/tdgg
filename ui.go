@@ -433,7 +433,7 @@ func scroll(dy int, chat *chat, view string) error {
 	ty := oy + dy
 
 	// If we're at the bottom...
-	lines := strings.Count(v.ViewBuffer(), "\n") - y - 1
+	lines := v.ViewLinesHeight() - y - 1
 
 	chat.renderDebug(fmt.Sprintf("scroll: ox: %d, oy: %d, dy: %d, y: %d, lines: %d", ox, oy, dy, y, lines))
 	if ty > lines && view == "messages" {
