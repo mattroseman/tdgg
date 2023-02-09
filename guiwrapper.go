@@ -64,6 +64,14 @@ func (gw *guiwrapper) redraw() {
 
 		messageView.Clear()
 		fmt.Fprint(messageView, newbuf)
+
+		// When the message view is redrawn, the origin is reset to (0, 0) and an event is added to apply the Autoscroll and set the origin to the bottom of the view.
+		// But this event is asynchronous, and not within the guiwrapper.Lock() mutex of this function
+		// This can cause race conditions if scrolling fast, i.e. a scroll happens when the origin is still 0, 0 because the view's flush method hasn't been called yet.
+		// Manually set the origin here to avoid the race condition on future scrolls
+		_, height := messageView.Size()
+		messageView.SetOrigin(0, messageView.ViewLinesHeight()-height-1)
+
 		return nil
 	})
 }
@@ -82,7 +90,7 @@ func (gw *guiwrapper) addMessage(m guimessage) {
 	gw.redraw()
 }
 
-//currently not in use
+// currently not in use
 func (gw *guiwrapper) applyTag(tag string, nick string) {
 
 	gw.Lock()
