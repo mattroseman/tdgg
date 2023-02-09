@@ -23,10 +23,14 @@ type guimessage struct {
 	msg string
 	// TODO right now only set this when we want to modify tag/highlight/ignore/... later on... not on "system" messages; even though they technically have a sender too...
 	nick string
+	pin  bool
 }
 
 func (gw *guiwrapper) formatMessage(gm *guimessage) string {
 	formattedDate := gm.ts.Format(gw.timeformat)
+	if gm.pin {
+		formattedDate = gm.ts.Format("Jan 2, 2006 3:04PM")
+	}
 	return fmt.Sprintf("[%s]%s%s", formattedDate, gm.tag, gm.msg)
 }
 
