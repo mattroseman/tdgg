@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -66,7 +67,7 @@ func layout(g *gocui.Gui) error {
 	g.Cursor = true
 
 	if messages, err := g.SetView("debug", int(maxX/4*2), 0, maxX-20, maxY/3, 0); err != nil {
-		if !gocui.IsUnknownView(err) {
+		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
 		messages.Title = " debug: "
@@ -75,7 +76,7 @@ func layout(g *gocui.Gui) error {
 	}
 
 	if messages, err := g.SetView("help", maxX/4*2, 0, maxX-20, maxY/2, 0); err != nil {
-		if !gocui.IsUnknownView(err) {
+		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
 		messages.Title = " help: "
@@ -109,7 +110,7 @@ func layout(g *gocui.Gui) error {
 	}
 
 	if messages, err := g.SetView("messages", 0, 0, xDimension, maxY-3, 0); err != nil {
-		if !gocui.IsUnknownView(err) {
+		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
 		messages.Title = " messages "
@@ -118,7 +119,7 @@ func layout(g *gocui.Gui) error {
 	}
 
 	if input, err := g.SetView("input", 0, maxY-3, xDimension, maxY-1, 0); err != nil {
-		if !gocui.IsUnknownView(err) {
+		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
 		input.Title = " send "
@@ -130,7 +131,7 @@ func layout(g *gocui.Gui) error {
 	}
 
 	if users, err := g.SetView("users", maxX-20, 0, maxX-1, maxY-1, 0); err != nil {
-		if !gocui.IsUnknownView(err) {
+		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
 		users.Title = " users "
@@ -397,7 +398,7 @@ func (c *chat) historyUp(g *gocui.Gui, v *gocui.View) error {
 	v.Clear()
 	v.SetCursor(0, 0)
 	v.Write([]byte(c.messageHistory[c.historyIndex]))
-	v.MoveCursor(len(c.messageHistory[c.historyIndex]), 0, true)
+	v.MoveCursor(len(c.messageHistory[c.historyIndex]), 0)
 	return nil
 }
 
@@ -413,7 +414,7 @@ func (c *chat) historyDown(g *gocui.Gui, v *gocui.View) error {
 	v.Clear()
 	v.SetCursor(0, 0)
 	v.Write([]byte(c.messageHistory[c.historyIndex]))
-	v.MoveCursor(len(c.messageHistory[c.historyIndex]), 0, true)
+	v.MoveCursor(len(c.messageHistory[c.historyIndex]), 0)
 	return nil
 }
 
