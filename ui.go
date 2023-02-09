@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MemeLabs/dggchat"
 	"github.com/awesome-gocui/gocui"
 	"github.com/gen2brain/beeep"
-	"github.com/mattroseman/dggchat"
 )
 
 type color string
