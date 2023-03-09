@@ -188,7 +188,7 @@ func (c *chat) renderDebug(s interface{}) {
 func (c *chat) renderError(errorString string) {
 	tag := fmt.Sprintf(" %sX%s ", bgRed, reset)
 	msg := fmt.Sprintf("%s*Error sending message: %s*%s", fgBrightRed, errorString, reset)
-	c.guiwrapper.addMessage(guimessage{time.Now(), tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{time.Now(), tag, msg, "", false})
 }
 
 func (c *chat) isHighlighted(message string) bool {
@@ -272,19 +272,63 @@ func (c *chat) renderMessage(m dggchat.Message) {
 	// }
 
 	msg := fmt.Sprintf("%s: %s", coloredNick, formattedData)
-	c.guiwrapper.addMessage(guimessage{m.Timestamp, formattedTag, msg, m.Sender.Nick})
+	c.guiwrapper.addMessage(guimessage{m.Timestamp, formattedTag, msg, m.Sender.Nick, false})
+}
+
+func (c *chat) renderPin(p dggchat.Pin) {
+	taggedNick := p.Sender.Nick
+
+	var coloredNick string
+
+	if c.isTagged(p.Sender.Nick) {
+		coloredNick = fmt.Sprintf("%s%s %s", tagMap[c.config.Tags[strings.ToLower(p.Sender.Nick)]], taggedNick, reset) // change color of username if the user is tagged
+	}
+
+	if coloredNick == "" {
+		coloredNick = fmt.Sprintf("%s%s%s", Bold, taggedNick, reset)
+	}
+
+	formattedData := p.Message
+	var messageColor string
+	if c.username != "" && strings.Contains(strings.ToLower(p.Message), strings.ToLower(c.username)) || c.isHighlighted(p.Message) {
+		messageColor = c.config.HighlightBg
+		if c.config.MsgNotify {
+			beeep.Notify("tdgg - "+p.Sender.Nick, p.Message, "")
+		}
+	}
+	switch {
+	case strings.HasPrefix(p.Message, ">"):
+		messageColor += string(fgGreen)
+	case strings.HasPrefix(p.Message, "ඞ"):
+		messageColor += string(fgMagenta)
+	}
+	if messageColor == c.config.HighlightBg {
+		messageColor += c.config.HighlightFg
+	}
+	formattedData = fmt.Sprintf("%s%s%s", messageColor, formattedData, reset)
+
+	// currently not in use
+	formattedTag := "   "
+	c.config.RLock()
+	if color, ok := c.config.Tags[strings.ToLower(p.Sender.Nick)]; ok {
+		formattedTag = fmt.Sprintf("%s   %s", tagMap[color], reset)
+	}
+	c.config.RUnlock()
+
+	msg := fmt.Sprintf("%s: %s", coloredNick, formattedData)
+	c.guiwrapper.addMessage(guimessage{p.Timestamp, formattedTag, msg, p.Sender.Nick, true})
 }
 
 func (c *chat) renderPrivateMessage(pm dggchat.PrivateMessage) {
 	tag := fmt.Sprintf(" %s%s*%s ", bgBlack, fgRed, reset)
 	msg := fmt.Sprintf("%s[PM <- %s] %s %s", fgBrightWhite, pm.User.Nick, pm.Message, reset)
-	c.guiwrapper.addMessage(guimessage{pm.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{pm.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderSendPrivateMessage(nick string, message string) {
 	tag := fmt.Sprintf(" %s%s*%s ", bgBlack, fgRed, reset)
 	msg := fmt.Sprintf("%s[PM -> %s] %s %s", fgBrightWhite, nick, message, reset)
-	c.guiwrapper.addMessage(guimessage{time.Now(), tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{time.Now(), tag, msg, "", false})
 }
 
 func (c *chat) renderBroadcast(b dggchat.Broadcast) {
@@ -294,14 +338,14 @@ func (c *chat) renderBroadcast(b dggchat.Broadcast) {
 		extra = fmt.Sprintf("from %s ", b.Sender.Nick)
 	}
 	msg := fmt.Sprintf("%sBROADCAST %s: %s %s", fgBrightYellow, extra, b.Message, reset)
-	c.guiwrapper.addMessage(guimessage{b.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{b.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderJoin(join dggchat.RoomAction) {
 	if contains(c.config.Stalks, strings.ToLower(join.User.Nick)) || c.config.ShowJoinLeave {
 		tag := fmt.Sprintf(" %s>%s ", bgGreen, reset)
 		msg := fmt.Sprintf("%s%s joined!%s", fgGreen, join.User.Nick, reset)
-		c.guiwrapper.addMessage(guimessage{join.Timestamp, tag, msg, ""})
+		c.guiwrapper.addMessage(guimessage{join.Timestamp, tag, msg, "", false})
 	}
 }
 
@@ -309,44 +353,44 @@ func (c *chat) renderQuit(quit dggchat.RoomAction) {
 	if contains(c.config.Stalks, strings.ToLower(quit.User.Nick)) || c.config.ShowJoinLeave {
 		tag := fmt.Sprintf(" %s<%s ", bgRed, reset)
 		msg := fmt.Sprintf("%s%s left.%s", fgRed, quit.User.Nick, reset)
-		c.guiwrapper.addMessage(guimessage{quit.Timestamp, tag, msg, ""})
+		c.guiwrapper.addMessage(guimessage{quit.Timestamp, tag, msg, "", false})
 	}
 }
 
 func (c *chat) renderMute(mute dggchat.Mute) {
 	tag := fmt.Sprintf(" %s!%s ", bgYellow, reset)
 	msg := fmt.Sprintf("%s%s muted by %s%s", fgYellow, mute.Target.Nick, mute.Sender.Nick, reset)
-	c.guiwrapper.addMessage(guimessage{mute.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{mute.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderUnmute(unmute dggchat.Mute) {
 	tag := fmt.Sprintf(" %s!%s ", bgYellow, reset)
 	msg := fmt.Sprintf("%s%s unmuted by %s%s", fgYellow, unmute.Target.Nick, unmute.Sender.Nick, reset)
-	c.guiwrapper.addMessage(guimessage{unmute.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{unmute.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderBan(ban dggchat.Ban) {
 	tag := fmt.Sprintf(" %s!%s ", bgRed, reset)
 	msg := fmt.Sprintf("%s%s banned by %s%s", fgRed, ban.Target.Nick, ban.Sender.Nick, reset)
-	c.guiwrapper.addMessage(guimessage{ban.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{ban.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderUnban(unban dggchat.Ban) {
 	tag := fmt.Sprintf(" %s!%s ", bgRed, reset)
 	msg := fmt.Sprintf("%s%s unbanned by %s%s", fgRed, unban.Target.Nick, unban.Sender.Nick, reset)
-	c.guiwrapper.addMessage(guimessage{unban.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{unban.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderSubOnly(so dggchat.SubOnly) {
 	tag := fmt.Sprintf(" %s$%s ", bgMagenta, reset)
 	msg := fmt.Sprintf("%s%s changed subonly mode to: %t %s", fgMagenta, so.Sender.Nick, so.Active, reset)
-	c.guiwrapper.addMessage(guimessage{so.Timestamp, tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{so.Timestamp, tag, msg, "", false})
 }
 
 func (c *chat) renderCommand(s string) {
 	tag := fmt.Sprintf(" %sI%s ", bgWhite, reset)
 	msg := fmt.Sprintf("%s%s%s", fgWhite, s, reset)
-	c.guiwrapper.addMessage(guimessage{time.Now(), tag, msg, ""})
+	c.guiwrapper.addMessage(guimessage{time.Now(), tag, msg, "", false})
 }
 
 func (c *chat) renderUsers(users []dggchat.User) {

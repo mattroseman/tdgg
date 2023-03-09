@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/MemeLabs/dggchat v0.0.0-20201117114323-43344edb4906
+	github.com/MemeLabs/dggchat v0.0.0-20230209070656-3366f640620e
 	github.com/awesome-gocui/gocui v0.6.0
 	github.com/gen2brain/beeep v0.0.0-20220909211152-5a9ec94374f6
 )

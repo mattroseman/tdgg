@@ -166,6 +166,9 @@ func main() {
 	chat.Session.AddMessageHandler(func(m dggchat.Message, s *dggchat.Session) {
 		chat.renderMessage(m)
 	})
+	chat.Session.AddPinHandler(func(p dggchat.Pin, s *dggchat.Session) {
+		chat.renderPin(p)
+	})
 	chat.Session.AddErrorHandler(func(e string, s *dggchat.Session) {
 		chat.renderError(e)
 	})
