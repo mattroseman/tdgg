@@ -21,9 +21,9 @@ const (
 	none  color = ""
 	reset color = "\u001b[0m"
 
-	Bold      color = "\u001b[1m"
-	Underline color = "\u001b[4m"
-	Reversed  color = "\u001b[7m"
+	Bold color = "\u001b[1m"
+	//Underline color = "\u001b[4m"
+	//Reversed  color = "\u001b[7m"
 
 	bgBlack   color = "\u001b[40m"
 	bgRed     color = "\u001b[41m"
@@ -34,32 +34,32 @@ const (
 	bgCyan    color = "\u001b[46m"
 	bgWhite   color = "\u001b[47m"
 
-	bgBrightBlack   color = "\u001b[40;1m"
-	bgBrightRed     color = "\u001b[41;1m"
-	bgBrightGreen   color = "\u001b[42;1m"
-	bgBrightYellow  color = "\u001b[43;1m"
-	bgBrightBlue    color = "\u001b[44;1m"
-	bgBrightMagenta color = "\u001b[45;1m"
-	bgBrightCyan    color = "\u001b[46;1m"
-	bgBrightWhite   color = "\u001b[47;1m"
+	//bgBrightBlack   color = "\u001b[40;1m"
+	//bgBrightRed     color = "\u001b[41;1m"
+	//bgBrightGreen   color = "\u001b[42;1m"
+	//bgBrightYellow  color = "\u001b[43;1m"
+	//bgBrightBlue    color = "\u001b[44;1m"
+	//bgBrightMagenta color = "\u001b[45;1m"
+	//bgBrightCyan    color = "\u001b[46;1m"
+	//bgBrightWhite   color = "\u001b[47;1m"
 
-	fgBlack   color = "\u001b[30m"
-	fgRed     color = "\u001b[31m"
-	fgGreen   color = "\u001b[32m"
-	fgYellow  color = "\u001b[33m"
-	fgBlue    color = "\u001b[34m"
+	//fgBlack   color = "\u001b[30m"
+	fgRed    color = "\u001b[31m"
+	fgGreen  color = "\u001b[32m"
+	fgYellow color = "\u001b[33m"
+	//fgBlue    color = "\u001b[34m"
 	fgMagenta color = "\u001b[35m"
-	fgCyan    color = "\u001b[36m"
-	fgWhite   color = "\u001b[37m"
+	//fgCyan    color = "\u001b[36m"
+	fgWhite color = "\u001b[37m"
 
-	fgBrightBlack   color = "\u001b[30;1m"
-	fgBrightRed     color = "\u001b[31;1m"
-	fgBrightGreen   color = "\u001b[32;1m"
-	fgBrightYellow  color = "\u001b[33;1m"
-	fgBrightBlue    color = "\u001b[34;1m"
-	fgBrightMagenta color = "\u001b[35;1m"
-	fgBrightCyan    color = "\u001b[36;1m"
-	fgBrightWhite   color = "\u001b[37;1m"
+	//fgBrightBlack   color = "\u001b[30;1m"
+	fgBrightRed color = "\u001b[31;1m"
+	//fgBrightGreen   color = "\u001b[32;1m"
+	fgBrightYellow color = "\u001b[33;1m"
+	//fgBrightBlue    color = "\u001b[34;1m"
+	//fgBrightMagenta color = "\u001b[35;1m"
+	//fgBrightCyan    color = "\u001b[36;1m"
+	fgBrightWhite color = "\u001b[37;1m"
 )
 
 func layout(g *gocui.Gui) error {
@@ -70,7 +70,7 @@ func layout(g *gocui.Gui) error {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
-		messages.Title = " debug: "
+		messages.Title = " debug "
 		messages.Wrap = true
 		messages.Autoscroll = true
 	}
@@ -79,7 +79,7 @@ func layout(g *gocui.Gui) error {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
-		messages.Title = " help: "
+		messages.Title = " help "
 		messages.Wrap = true
 
 		// command map is unordered, we want the help menu to be stable
@@ -127,7 +127,9 @@ func layout(g *gocui.Gui) error {
 		input.Wrap = true
 		input.Editable = true
 
-		g.SetCurrentView("input")
+		if _, err := g.SetCurrentView("input"); err != nil {
+			return err
+		}
 	}
 
 	if users, err := g.SetView("users", maxX-20, 0, maxX-1, maxY-1, 0); err != nil {
@@ -230,10 +232,13 @@ func (c *chat) renderMessage(m dggchat.Message) {
 
 	formattedData := m.Message
 	var messageColor string
+
 	if c.username != "" && strings.Contains(strings.ToLower(m.Message), strings.ToLower(c.username)) || c.isHighlighted(m.Message) {
 		messageColor = c.config.HighlightBg
 		if c.config.MsgNotify {
-			beeep.Notify("tdgg - "+m.Sender.Nick, m.Message, "")
+			if err := beeep.Notify("tdgg - "+m.Sender.Nick, m.Message, ""); err != nil {
+				log.Println(err)
+			}
 		}
 	}
 	switch {
@@ -294,7 +299,9 @@ func (c *chat) renderPin(p dggchat.Pin) {
 	if c.username != "" && strings.Contains(strings.ToLower(p.Message), strings.ToLower(c.username)) || c.isHighlighted(p.Message) {
 		messageColor = c.config.HighlightBg
 		if c.config.MsgNotify {
-			beeep.Notify("tdgg - "+p.Sender.Nick, p.Message, "")
+			if err := beeep.Notify("tdgg - "+p.Sender.Nick, p.Message, ""); err != nil {
+				log.Println(err)
+			}
 		}
 	}
 	switch {
@@ -440,8 +447,12 @@ func (c *chat) historyUp(g *gocui.Gui, v *gocui.View) error {
 	}
 	c.historyIndex++
 	v.Clear()
-	v.SetCursor(0, 0)
-	v.Write([]byte(c.messageHistory[c.historyIndex]))
+	if err := v.SetCursor(0, 0); err != nil {
+		return err
+	}
+	if _, err := v.Write([]byte(c.messageHistory[c.historyIndex])); err != nil {
+		return err
+	}
 	v.MoveCursor(len(c.messageHistory[c.historyIndex]), 0)
 	return nil
 }
@@ -450,14 +461,20 @@ func (c *chat) historyDown(g *gocui.Gui, v *gocui.View) error {
 	if c.historyIndex < 1 {
 		c.historyIndex = -1
 		v.Clear()
-		v.SetCursor(0, 0)
+		if err := v.SetCursor(0, 0); err != nil {
+			return err
+		}
 		return nil
 	}
 
 	c.historyIndex--
 	v.Clear()
-	v.SetCursor(0, 0)
-	v.Write([]byte(c.messageHistory[c.historyIndex]))
+	if err := v.SetCursor(0, 0); err != nil {
+		return err
+	}
+	if _, err := v.Write([]byte(c.messageHistory[c.historyIndex])); err != nil {
+		return err
+	}
 	v.MoveCursor(len(c.messageHistory[c.historyIndex]), 0)
 	return nil
 }
@@ -504,7 +521,9 @@ func scroll(dy int, chat *chat, view string) error {
 		ty = lines
 	}
 
-	v.SetOrigin(ox, ty)
+	if err := v.SetOrigin(ox, ty); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/url"
 	"sort"
 	"strings"
@@ -169,9 +170,15 @@ func (c *chat) tabComplete(v *gocui.View) {
 	// }
 
 	v.Clear()
-	v.SetOrigin(0, 0)
-	v.Write(newBuffer)
-	v.SetCursor(newCursor, 0)
+	if err := v.SetOrigin(0, 0); err != nil {
+		log.Println(err)
+	}
+	if _, err := v.Write(newBuffer); err != nil {
+		log.Println(err)
+	}
+	if err := v.SetCursor(newCursor, 0); err != nil {
+		log.Println(err)
+	}
 }
 
 func (c *chat) generateSuggestions(s string) []string {

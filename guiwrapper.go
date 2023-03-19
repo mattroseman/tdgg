@@ -70,7 +70,9 @@ func (gw *guiwrapper) redraw() {
 		// This can cause race conditions if scrolling fast, i.e. a scroll happens when the origin is still 0, 0 because the view's flush method hasn't been called yet.
 		// Manually set the origin here to avoid the race condition on future scrolls
 		_, height := messageView.Size()
-		messageView.SetOrigin(0, messageView.ViewLinesHeight()-height-1)
+		if err := messageView.SetOrigin(0, messageView.ViewLinesHeight()-height-1); err != nil {
+			return err
+		}
 
 		return nil
 	})

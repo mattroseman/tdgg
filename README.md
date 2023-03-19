@@ -13,6 +13,6 @@ Original code from: https://github.com/MemeLabs/tsgg
 
 Command line flags:
 
-`--config` <u>path</u>
+`--config` [path]
 
-`--chat` dgg|ogg|sgg
+`--chat` [dgg|ogg|sgg]

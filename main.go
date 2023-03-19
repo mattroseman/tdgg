@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -60,8 +61,7 @@ func main() {
 		PageUpDownSpeed: 10,
 	}
 
-	_, err := toml.DecodeFile(configFile, &config)
-	if err != nil {
+	if _, err := toml.DecodeFile(configFile, &config); err != nil {
 		log.Fatalf("malformed configuration file: %v\n", err)
 	}
 
@@ -136,8 +136,12 @@ func main() {
 		chat.handleInput(strings.TrimSpace(v.Buffer()))
 		g.Update(func(g *gocui.Gui) error {
 			v.Clear()
-			v.SetCursor(0, 0)
-			v.SetOrigin(0, 0)
+			if err := v.SetCursor(0, 0); err != nil {
+				return err
+			}
+			if err := v.SetOrigin(0, 0); err != nil {
+				return err
+			}
 			return nil
 		})
 
@@ -246,21 +250,19 @@ func main() {
 		}
 
 		if res.StatusCode == 200 {
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = json.Unmarshal(body, &received)
-			if err != nil {
+			if err := json.Unmarshal(body, &received); err != nil {
 				log.Fatal(err)
 			}
 
 			for _, x := range received {
 				mslice := strings.SplitN(x, " ", 2)
 				var m message
-				err := json.Unmarshal([]byte(mslice[1]), &m)
-				if err != nil {
+				if err := json.Unmarshal([]byte(mslice[1]), &m); err != nil {
 					log.Fatal(err)
 				}
 				user := dggchat.User{
@@ -277,8 +279,7 @@ func main() {
 		}
 	}
 
-	err = chat.Session.Open()
-	if err != nil {
+	if err := chat.Session.Open(); err != nil {
 		// Most common problem is that the connection couldn't be established.
 		log.Panicln(err)
 	}
@@ -295,13 +296,11 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 
 func (cfg *config) save() error {
 	buf := bytes.NewBuffer([]byte{})
-	err := toml.NewEncoder(buf).Encode(&cfg)
-	if err != nil {
+	if err := toml.NewEncoder(buf).Encode(&cfg); err != nil {
 		return fmt.Errorf("error marshaling config: %v", err)
 	}
 
-	err = ioutil.WriteFile(configFile, buf.Bytes(), 0600)
-	if err != nil {
+	if err := os.WriteFile(configFile, buf.Bytes(), 0600); err != nil {
 		return fmt.Errorf("error saving config: %v", err)
 	}
 	return nil

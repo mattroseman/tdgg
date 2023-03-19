@@ -76,8 +76,7 @@ func addHighlight(c *chat, tokens []string) error {
 	c.config.Highlighted = append(c.config.Highlighted, user)
 	c.config.Unlock()
 
-	err := c.config.save()
-	if err != nil {
+	if err := c.config.save(); err != nil {
 		return err
 	}
 	msg := fmt.Sprintf("Highlighted %s", user)
@@ -97,8 +96,7 @@ func removeHighlight(c *chat, tokens []string) error {
 	for i := 0; i < len(c.config.Highlighted); i++ {
 		if strings.ToLower(c.config.Highlighted[i]) == user {
 			c.config.Highlighted = append(c.config.Highlighted[:i], c.config.Highlighted[i+1:]...)
-			err := c.config.save()
-			if err != nil {
+			if err := c.config.save(); err != nil {
 				return err
 			}
 			msg := fmt.Sprintf("Unhighlighted %s", user)
@@ -124,8 +122,7 @@ func addStalk(c *chat, tokens []string) error {
 	c.config.Stalks = append(c.config.Stalks, user)
 	c.config.Unlock()
 
-	err := c.config.save()
-	if err != nil {
+	if err := c.config.save(); err != nil {
 		return err
 	}
 	msg := fmt.Sprintf("Now stalking %s", user)
@@ -145,8 +142,7 @@ func removeStalk(c *chat, tokens []string) error {
 	for i := 0; i < len(c.config.Stalks); i++ {
 		if strings.ToLower(c.config.Stalks[i]) == user {
 			c.config.Stalks = append(c.config.Stalks[:i], c.config.Stalks[i+1:]...)
-			err := c.config.save()
-			if err != nil {
+			if err := c.config.save(); err != nil {
 				return err
 			}
 			msg := fmt.Sprintf("No longer stalking %s", user)
@@ -178,8 +174,7 @@ func addTag(c *chat, tokens []string) error {
 	c.config.Tags[user] = color
 	c.config.Unlock()
 
-	err := c.config.save()
-	if err != nil {
+	if err := c.config.save(); err != nil {
 		return err
 	}
 
@@ -202,8 +197,7 @@ func removeTag(c *chat, tokens []string) error {
 
 	if _, ok := c.config.Tags[user]; ok {
 		delete(c.config.Tags, user)
-		err := c.config.save()
-		if err != nil {
+		if err := c.config.save(); err != nil {
 			return err
 		}
 		newTag := fmt.Sprintf("%s   %s", none, reset)
@@ -333,8 +327,7 @@ func addIgnore(c *chat, tokens []string) error {
 	user := strings.ToLower(tokens[1])
 	if !contains(c.config.Ignores, user) {
 		c.config.Ignores = append(c.config.Ignores, user)
-		err := c.config.save()
-		if err != nil {
+		if err := c.config.save(); err != nil {
 			return err
 		}
 		msg := fmt.Sprintf("Ignoring %s", user)
@@ -356,8 +349,7 @@ func removeIgnore(c *chat, tokens []string) error {
 	for i, u := range c.config.Ignores {
 		if u == user {
 			c.config.Ignores = append(c.config.Ignores[:i], c.config.Ignores[i+1:]...)
-			err := c.config.save()
-			if err != nil {
+			if err := c.config.save(); err != nil {
 				return err
 			}
 			msg := fmt.Sprintf("%s removed from your ignore list", u)

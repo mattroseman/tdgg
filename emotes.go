@@ -57,15 +57,13 @@ func getEmotes() ([]string, error) {
 	switch chatServer {
 	case "sgg":
 		var em sggEndpointResponse
-		err = json.NewDecoder(resp.Body).Decode(&em)
-		if err != nil {
+		if err := json.NewDecoder(resp.Body).Decode(&em); err != nil {
 			return emotes, err
 		}
 		emotes = append(emotes, em.Default...)
 	default:
 		var em []Emote
-		err = json.NewDecoder(resp.Body).Decode(&em)
-		if err != nil {
+		if err := json.NewDecoder(resp.Body).Decode(&em); err != nil {
 			return emotes, err
 		}
 		emotes = append(emotes, getEmoteNames(em)...)
