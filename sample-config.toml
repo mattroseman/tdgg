@@ -1,5 +1,6 @@
-auth_token = "authtoken here"
-custom_url = "wss://chat.destiny.gg/ws"
+dgg_auth_token = "authtoken here"
+ogg_auth_token = "authtoken here"
+sgg_auth_token = "authtoken here"
 username = "cantclosevim"
 timeformat = "3:04PM"
 maxlines = 1000
@@ -14,7 +15,6 @@ showjoinleave = false
 highlight_bg_color = "\u001b[47m"
 highlight_fg_color = "\u001b[30m"
 load_history = true
-history_url = "https://www.destiny.gg/api/chat/history"
 
 [tags]
   cantclosevim = "cyan"

@@ -18,8 +18,9 @@ import (
 )
 
 type config struct {
-	AuthToken       string            `toml:"auth_token"`
-	CustomURL       string            `toml:"custom_url"`
+	DGGAuthToken    string            `toml:"dgg_auth_token"`
+	OGGAuthToken    string            `toml:"ogg_auth_token"`
+	SGGAuthToken    string            `toml:"sgg_auth_token"`
 	Username        string            `toml:"username"`
 	Timeformat      string            `toml:"timeformat"`
 	Maxlines        int               `toml:"maxlines"`
@@ -38,14 +39,15 @@ type config struct {
 	HighlightBg     string            `toml:"highlight_bg_color"`
 	HighlightFg     string            `toml:"highlight_fg_color"`
 	LoadHistory     bool              `toml:"load_history"`
-	HistoryURL      string            `toml:"history_url"`
 	sync.RWMutex
 }
 
 var configFile string
+var chatServer string
 
 func init() {
 	flag.StringVar(&configFile, "config", "config.toml", "location of config file to be used")
+	flag.StringVar(&chatServer, "chat", "dgg", "chat server to connect to")
 	flag.Parse()
 }
 
@@ -223,7 +225,17 @@ func main() {
 			Timeout: time.Second * 2,
 		}
 
-		req, err := http.NewRequest(http.MethodGet, config.HistoryURL, nil)
+		var historyAddress string
+
+		switch chatServer {
+		case "dgg":
+			historyAddress = "https://www.destiny.gg/api/chat/history"
+		case "ogg":
+			historyAddress = "https://www.omniliberal.dev/api/chat/history"
+		case "sgg":
+			historyAddress = "https://chat.strims.gg/api/chat/history"
+		}
+		req, err := http.NewRequest(http.MethodGet, historyAddress, nil)
 		if err != nil {
 			log.Fatal(err)
 		}

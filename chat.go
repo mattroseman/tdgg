@@ -30,18 +30,31 @@ type chat struct {
 }
 
 func newChat(config *config, g *gocui.Gui) (*chat, error) {
-	sgg, err := dggchat.New(config.AuthToken)
+	var chatAddress string
+	var auth string
+
+	switch chatServer {
+	case "dgg":
+		chatAddress = "wss://chat.destiny.gg/ws"
+		auth = config.DGGAuthToken
+	case "ogg":
+		chatAddress = "wss://chat.omniliberal.dev/ws"
+		auth = config.OGGAuthToken
+	case "sgg":
+		chatAddress = "wss://chat.strims.gg/ws"
+		auth = config.SGGAuthToken
+	}
+
+	dgg, err := dggchat.New(auth)
 	if err != nil {
 		return nil, err
 	}
 
-	if config.CustomURL != "" {
-		url, err := url.Parse(config.CustomURL)
-		if err != nil {
-			return nil, err
-		}
-		sgg.SetURL(*url)
+	url, err := url.Parse(chatAddress)
+	if err != nil {
+		return nil, err
 	}
+	dgg.SetURL(*url)
 
 	chat := &chat{
 		config:         config,
@@ -50,7 +63,7 @@ func newChat(config *config, g *gocui.Gui) (*chat, error) {
 		tabIndex:       -1,
 		emotes:         make([]string, 0),
 		username:       config.Username,
-		Session:        sgg,
+		Session:        dgg,
 		guiwrapper: &guiwrapper{
 			gui:        g,
 			messages:   []*guimessage{},
@@ -60,7 +73,6 @@ func newChat(config *config, g *gocui.Gui) (*chat, error) {
 	}
 
 	// don't wait for emotes to load
-
 	go func() {
 		emotes, _ := getEmotes()
 		chat.emotes = emotes

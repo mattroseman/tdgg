@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-const emoteEndpoint = "https://cdn.destiny.gg/emotes/emotes.json"
-
 type ImageData struct {
 	Height int32  `json:"height"`
 	Width  int32  `json:"width"`
@@ -22,6 +20,10 @@ type Emote struct {
 	Image  []ImageData `json:"image"`
 }
 
+type sggEndpointResponse struct {
+	Default []string `json:"default"`
+}
+
 func getEmoteNames(e []Emote) []string {
 	s := make([]string, len(e))
 	for i, em := range e {
@@ -32,7 +34,16 @@ func getEmoteNames(e []Emote) []string {
 
 func getEmotes() ([]string, error) {
 	emotes := make([]string, 0)
+	var emoteEndpoint string
 
+	switch chatServer {
+	case "dgg":
+		emoteEndpoint = "https://cdn.destiny.gg/emotes/emotes.json"
+	case "ogg":
+		emoteEndpoint = "https://cdn.omniliberal.dev/emotes/emotes.json"
+	case "sgg":
+		emoteEndpoint = "https://raw.githubusercontent.com/MemeLabs/chat-gui/master/assets/emotes.json"
+	}
 	resp, err := http.Get(emoteEndpoint)
 	if err != nil {
 		return emotes, err
@@ -43,27 +54,22 @@ func getEmotes() ([]string, error) {
 		return emotes, fmt.Errorf("emote endpoint status code %d", resp.StatusCode)
 	}
 
-	// var em []Emote = make([]Emote, 0)
-	var em []Emote
-
-	err = json.NewDecoder(resp.Body).Decode(&em)
-	if err != nil {
-		return emotes, err
+	switch chatServer {
+	case "sgg":
+		var em sggEndpointResponse
+		err = json.NewDecoder(resp.Body).Decode(&em)
+		if err != nil {
+			return emotes, err
+		}
+		emotes = append(emotes, em.Default...)
+	default:
+		var em []Emote
+		err = json.NewDecoder(resp.Body).Decode(&em)
+		if err != nil {
+			return emotes, err
+		}
+		emotes = append(emotes, getEmoteNames(em)...)
 	}
 
-	// b, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return emotes, err
-	// }
-
-	// err = json.Unmarshal(b, &em)
-	// if err != nil {
-	// 	return emotes, err
-	// }
-	// for _, item := range em {
-	// 	log.Println(item)
-	// }
-
-	emotes = append(emotes, getEmoteNames(em)...)
 	return emotes, nil
 }
